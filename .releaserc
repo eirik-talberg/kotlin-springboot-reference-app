@@ -1,0 +1,44 @@
+{
+    "branches": [
+        "main",
+    ],
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        "@semantic-release/changelog",
+        [
+            "@semantic-release/exec",
+            {
+                "prepareCmd": "mvn versions:set -DnewVersion=${nextRelease.version}",
+                "publishCmd": "mvn clean package; docker build --tag eirik-talberg/kotlin-springboot-reference-app ."
+            }
+        ],
+        [
+            "@semantic-release-plus/docker",
+            {
+                "name": {
+                    "registry": "ghcr.io",
+                    "namespace": "eirik-talberg",
+                    "repository": "kotlin-springboot-reference-app"
+                },
+                "publishChannelTag": false
+            }
+        ],
+        [
+            "@semantic-release/git",
+            {
+                "assets": [
+                    "CHANGELOG.md"
+                ]
+            }
+        ],
+        [
+            "@semantic-release/github",
+            {
+                "assets": [
+                    "dist/*"
+                ]
+            }
+        ]
+    ]
+}

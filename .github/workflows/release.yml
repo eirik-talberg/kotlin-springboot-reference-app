@@ -1,0 +1,36 @@
+name: Release
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+jobs:
+  qa:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+    permissions:
+      checks: write
+      id-token: write
+      contents: read
+  release:
+    runs-on: ubuntu-latest
+    needs: qa
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: "maven"
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/exec
+            @semantic-release-plus/docker
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          DOCKER_USERNAME: eirik-talberg
+          DOCKER_PASSWORD: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
